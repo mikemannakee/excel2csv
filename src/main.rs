@@ -1,6 +1,5 @@
 use std::{env, io::Write};
 use calamine::{Reader, open_workbook_auto, DataType};
-use regex::Regex;
 
 fn main() {
 	let mut delim = ",";
@@ -40,14 +39,12 @@ fn main() {
 	dbg!(&sheets);
 	
 	let mut out = String::new();
-	let mut empty = false;
-	let mut line = String::new();
 	for sheet in sheets.iter() {
 		if let Some(Ok(range)) = workbook.worksheet_range(sheet) {
 			for row in range.rows() {
 				// A couple of flags to determine if the row is empty
-				empty = true;
-				line = "".to_string();
+				let mut empty = true;
+				let mut line = String::new();
 				for cell in row.iter() {
 					match cell {
 						DataType::Empty => line.push_str(delim),
