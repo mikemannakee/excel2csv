@@ -49,39 +49,39 @@ fn main() {
 					match cell {
 						DataType::Empty => line.push_str(delim),
 						DataType::String(s) => { 
-							line.push_str(&format!("{}{}", s, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", s.replace(delim, &format!("\\{}", delim)), delim));
 							empty = false;
 						},
 						DataType::Float(f) => {
-							line.push_str(&format!("{}{}", f, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", f, delim));
 							empty = false;
 						},
 						DataType::Int(i) => {
-							line.push_str(&format!("{}{}", i, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", i, delim));
 							empty = false;
 						},
 						DataType::Bool(b) => {
-							line.push_str(&format!("{}{}", b, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", b, delim));
 							empty = false;
 						},
 						DataType::Error(e) => {
-							line.push_str(&format!("{}{}", e, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", e, delim));
 							empty = false;
 						},
 						DataType::DateTime(dt) => {
-							line.push_str(&format!("{}{}", dt, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", dt, delim));
 							empty = false;
 						},
 						DataType::Duration(d) => {
-							line.push_str(&format!("{}{}", d, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", d, delim));
 							empty = false;
 						},
 						DataType::DateTimeIso(dt) => {
-							line.push_str(&format!("{}{}", dt, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", dt.replace(delim, &format!("\\{}", delim)), delim));
 							empty = false;
 						},
 						DataType::DurationIso(d) => {
-							line.push_str(&format!("{}{}", d, delim).replace(delim, ""));
+							line.push_str(&format!("{}{}", d.replace(delim, &format!("\\{}", delim)), delim));
 							empty = false;
 						}
 					}
