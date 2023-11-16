@@ -58,30 +58,37 @@ fn main() {
                             empty = false;
                         }
                         DataType::Float(f) => {
+							print!("'{}' is a float! ", f);
                             line.push_str(&format!("{}{}", f, delim));
                             empty = false;
                         }
                         DataType::Int(i) => {
+							print!("'{}' is an int! ", i);
                             line.push_str(&format!("{}{}", i, delim));
                             empty = false;
                         }
                         DataType::Bool(b) => {
+							print!("'{}' is a bool! ", b);
                             line.push_str(&format!("{}{}", b, delim));
                             empty = false;
                         }
                         DataType::Error(e) => {
+							print!("'{}' is a error! ", e);
                             line.push_str(&format!("{}{}", e, delim));
                             empty = false;
                         }
                         DataType::DateTime(dt) => {
+							print!("'{}' is a datetime! ", dt);
                             line.push_str(&format!("{}{}", dt, delim));
                             empty = false;
                         }
                         DataType::Duration(d) => {
+							print!("'{}' is a duration! ", d);
                             line.push_str(&format!("{}{}", d, delim));
                             empty = false;
                         }
                         DataType::DateTimeIso(dt) => {
+							print!("'{}' is a dtISO! ", dt);
                             line.push_str(&format!(
                                 "{}{}",
                                 dt.replace(delim, &format!("\\{}", delim)),
@@ -90,6 +97,7 @@ fn main() {
                             empty = false;
                         }
                         DataType::DurationIso(d) => {
+							print!("'{}' is a duration ISO! ", d);
                             line.push_str(&format!(
                                 "{}{}",
                                 d.replace(delim, &format!("\\{}", delim)),
