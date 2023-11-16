@@ -9,3 +9,4 @@ about = "Converts Excel files to CSV files"
 
 [dependencies]
 calamine = "0.22.1"
+regex = "1.10.2"

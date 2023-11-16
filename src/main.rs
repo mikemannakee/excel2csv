@@ -1,5 +1,6 @@
 use calamine::{open_workbook_auto, DataType, Reader};
 use std::{env, io::Write};
+use regex::Regex;
 
 fn main() {
     let mut delim = ",";
@@ -35,6 +36,8 @@ fn main() {
 
     let sheets = workbook.sheet_names().to_owned();
 
+	let re = Regex::new(r"[^\x20-\x7e+]").unwrap();
+
     #[cfg(debug_assertions)]
     dbg!(&sheets);
 
@@ -49,9 +52,8 @@ fn main() {
                     match cell {
                         DataType::Empty => line.push_str(delim),
                         DataType::String(s) => {
-                            line.push_str(&format!("{}{}", 
-									s.replace(delim, &format!("\\{}", delim)), delim)  // Escape the delimiter
-									.replace(|c: char| !c.is_ascii(), "")); // Remove any non-ascii characters
+							let only_printable = re.replace_all(s, ""); // Remove non-printable characters
+                            line.push_str(&format!("{}{}", only_printable.replace(delim, &format!("\\{}", delim)), delim)); // Escape the delimiter
                             empty = false;
                         }
                         DataType::Float(f) => {
