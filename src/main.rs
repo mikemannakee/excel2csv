@@ -1,102 +1,116 @@
+use calamine::{open_workbook_auto, DataType, Reader};
 use std::{env, io::Write};
-use calamine::{Reader, open_workbook_auto, DataType};
 
 fn main() {
-	let mut delim = ",";
-	let args: Vec<String> = env::args().collect();
+    let mut delim = ",";
+    let args: Vec<String> = env::args().collect();
 
-	#[cfg(debug_assertions)]
-	dbg!(&args);
+    #[cfg(debug_assertions)]
+    dbg!(&args);
 
-	let filename = args[1].clone();
-	let len = args.len();
-	let out_filename: String = match len {
-		2 => match filename.rfind(".") {
-			Some(i) => format!("{}{}", &filename[..i], ".csv"),
-			None => format!("{}.csv", filename)
-		},
-		_ => args[2].clone()
-	};
+    let filename = args[1].clone();
+    let len = args.len();
+    let out_filename: String = match len {
+        2 => match filename.rfind(".") {
+            Some(i) => format!("{}{}", &filename[..i], ".csv"),
+            None => format!("{}.csv", filename),
+        },
+        _ => args[2].clone(),
+    };
 
-	if len > 3 {
-		delim = args[3].as_str();
-	}
+    if len > 3 {
+        delim = args[3].as_str();
+    }
 
-	#[cfg(debug_assertions)]
-	dbg!("Out filename: {}", &out_filename);
+    #[cfg(debug_assertions)]
+    dbg!("Out filename: {}", &out_filename);
 
-	let exists = std::path::Path::new(&filename).exists();
-	if !exists {
-		println!("Error: File '{}' does not exist", filename);
-		return;
-	}
+    let exists = std::path::Path::new(&filename).exists();
+    if !exists {
+        println!("Error: File '{}' does not exist", filename);
+        return;
+    }
 
-	let mut workbook = open_workbook_auto(&filename).expect("Cannot open file");
+    let mut workbook = open_workbook_auto(&filename).expect("Cannot open file");
 
-	let sheets = workbook.sheet_names().to_owned();
+    let sheets = workbook.sheet_names().to_owned();
 
-	#[cfg(debug_assertions)]
-	dbg!(&sheets);
-	
-	let mut out = String::new();
-	for sheet in sheets.iter() {
-		if let Some(Ok(range)) = workbook.worksheet_range(sheet) {
-			for row in range.rows() {
-				// A couple of flags to determine if the row is empty
-				let mut empty = true;
-				let mut line = String::new();
-				for cell in row.iter() {
-					match cell {
-						DataType::Empty => line.push_str(delim),
-						DataType::String(s) => { 
-							line.push_str(&format!("{}{}", s.replace(delim, &format!("\\{}", delim)), delim));
-							empty = false;
-						},
-						DataType::Float(f) => {
-							line.push_str(&format!("{}{}", f, delim));
-							empty = false;
-						},
-						DataType::Int(i) => {
-							line.push_str(&format!("{}{}", i, delim));
-							empty = false;
-						},
-						DataType::Bool(b) => {
-							line.push_str(&format!("{}{}", b, delim));
-							empty = false;
-						},
-						DataType::Error(e) => {
-							line.push_str(&format!("{}{}", e, delim));
-							empty = false;
-						},
-						DataType::DateTime(dt) => {
-							line.push_str(&format!("{}{}", dt, delim));
-							empty = false;
-						},
-						DataType::Duration(d) => {
-							line.push_str(&format!("{}{}", d, delim));
-							empty = false;
-						},
-						DataType::DateTimeIso(dt) => {
-							line.push_str(&format!("{}{}", dt.replace(delim, &format!("\\{}", delim)), delim));
-							empty = false;
-						},
-						DataType::DurationIso(d) => {
-							line.push_str(&format!("{}{}", d.replace(delim, &format!("\\{}", delim)), delim));
-							empty = false;
-						}
-					}
-				}
-				if !empty {
-					out.push_str(&line);
-					out.push_str("\n");
-				}
-			}
-		}
-	}
+    #[cfg(debug_assertions)]
+    dbg!(&sheets);
 
-	
-	let mut out_file = std::fs::File::create(&out_filename).expect("Cannot create file");
-	out_file.write_all(out.as_bytes()).expect("Cannot write to file");
+    let mut out = String::new();
+    for sheet in sheets.iter() {
+        if let Some(Ok(range)) = workbook.worksheet_range(sheet) {
+            for row in range.rows() {
+                // A couple of flags to determine if the row is empty
+                let mut empty = true;
+                let mut line = String::new();
+                for cell in row.iter() {
+                    match cell {
+                        DataType::Empty => line.push_str(delim),
+                        DataType::String(s) => {
+                            line.push_str(&format!("{}{}", 
+									s.replace(delim, &format!("\\{}", delim)), delim)  // Escape the delimiter
+									.replace(|c: char| !c.is_ascii(), "")); // Remove any non-ascii characters
+                            empty = false;
+                        }
+                        DataType::Float(f) => {
+                            line.push_str(&format!("{}{}", f, delim));
+                            empty = false;
+                        }
+                        DataType::Int(i) => {
+                            line.push_str(&format!("{}{}", i, delim));
+                            empty = false;
+                        }
+                        DataType::Bool(b) => {
+                            line.push_str(&format!("{}{}", b, delim));
+                            empty = false;
+                        }
+                        DataType::Error(e) => {
+                            line.push_str(&format!("{}{}", e, delim));
+                            empty = false;
+                        }
+                        DataType::DateTime(dt) => {
+                            line.push_str(&format!("{}{}", dt, delim));
+                            empty = false;
+                        }
+                        DataType::Duration(d) => {
+                            line.push_str(&format!("{}{}", d, delim));
+                            empty = false;
+                        }
+                        DataType::DateTimeIso(dt) => {
+                            line.push_str(&format!(
+                                "{}{}",
+                                dt.replace(delim, &format!("\\{}", delim)),
+                                delim
+                            ));
+                            empty = false;
+                        }
+                        DataType::DurationIso(d) => {
+                            line.push_str(&format!(
+                                "{}{}",
+                                d.replace(delim, &format!("\\{}", delim)),
+                                delim
+                            ));
+                            empty = false;
+                        }
+                    }
+                }
+                if !empty {
+                    out.push_str(&line);
+                    out.push_str("\n");
+                }
+            }
+        }
+    }
 
-	println!("File '{}' converted to '{}' using '{}' as the delimiter", filename, out_filename, delim);
+    let mut out_file = std::fs::File::create(&out_filename).expect("Cannot create file");
+    out_file
+        .write_all(out.as_bytes())
+        .expect("Cannot write to file");
+
+    println!(
+        "File '{}' converted to '{}' using '{}' as the delimiter",
+        filename, out_filename, delim
+    );
 }
