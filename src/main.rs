@@ -52,6 +52,7 @@ fn main() {
                     match cell {
                         DataType::Empty => line.push_str(delim),
                         DataType::String(s) => {
+							print!("'{}' is a string! ", s);
 							let only_printable = re.replace_all(s, ""); // Remove non-printable characters
                             line.push_str(&format!("{}{}", only_printable.replace(delim, &format!("\\{}", delim)), delim)); // Escape the delimiter
                             empty = false;
