@@ -3,22 +3,24 @@ use std::{env, io::Write};
 use regex::Regex;
 
 fn main() {
-	let mut delim = ",";
+	let mut delim = ",";  // Default delimiter is a comma
 	let args: Vec<String> = env::args().collect();
 
 	#[cfg(debug_assertions)]
 	dbg!(&args);
 
+	// Check if the user has provided the filename
 	let filename = args[1].clone();
 	let len = args.len();
 	let out_filename: String = match len {
-		2 => match filename.rfind(".") {
+		2 => match filename.rfind(".") { // If the user has not provided the output filename, we will use the input filename and change the extension to .csv
 			Some(i) => format!("{}{}", &filename[..i], ".csv"),
 			None => format!("{}.csv", filename),
 		},
-		_ => args[2].clone(),
+		_ => args[2].clone(), // If the user has provided the output filename, we will use that
 	};
 
+	// Check if the user has provided the delimiter
 	if len > 3 {
 		delim = args[3].as_str();
 	}
@@ -26,16 +28,19 @@ fn main() {
 	#[cfg(debug_assertions)]
 	dbg!("Out filename: {}", &out_filename);
 
+	// Check if the file exists
 	let exists = std::path::Path::new(&filename).exists();
 	if !exists {
 		println!("Error: File '{}' does not exist", filename);
 		return;
 	}
 
+	// Open the workbook
 	let mut workbook = open_workbook_auto(&filename).expect("Cannot open file");
 
 	let sheets = workbook.sheet_names().to_owned();
 
+	// Regex to remove non-printable characters
 	let re = Regex::new(r"[^\x20-\x7E]").unwrap();
 
 	#[cfg(debug_assertions)]
@@ -107,11 +112,13 @@ fn main() {
 		}
 	}
 
+	// Write the output to a file
 	let mut out_file = std::fs::File::create(&out_filename).expect("Cannot create file");
 	out_file
 		.write_all(out.as_bytes())
 		.expect("Cannot write to file");
 
+	// A message letting the user know that the file has been converted
 	println!(
 		"File '{}' converted to '{}' using '{}' as the delimiter",
 		filename, out_filename, delim
